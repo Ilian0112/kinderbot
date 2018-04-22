@@ -368,4 +368,4 @@ bot.on("message", async function(message) {
     }
 });
 
-bot.login('NDM2NjA1MTM4MjY2NzUwOTkz.Db4WEw.8V_rgvnx2rpkvjXfeu1_jD6CF9g');
+bot.login('NDM2NjA1MTM4MjY2NzUwOTkz.Db4aDQ.0DizRfrbBhDBnywgo-uziYFJsM4');
