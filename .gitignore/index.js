@@ -236,6 +236,7 @@ bot.on("message", async function(message) {
                  .addField(".stop", "Arreter la musique  Pour l'utiliser, faites .stop !")
                  .addField(".kinder", "Envoie un liens sur une image de Kinder !")
                  .addField(".lalaland", "Pour rejoindre LaLa Land !")
+                 .addField(".traductionhelp", "Pour afficher l'aide des traductions !")
                  .addField(".umbreallscp ", "Pour rejoindre  Umbreall SCP !")
                  .addField(".google", "Commande pas trop utile mais tu peut faire des recherche google. Pour l'utiliser, faites .google (recherche) !")
                  .addField(".shelp", "❌Afficher les commandes du staff. Mais seule ceux qui ont la perm de kick pourrons y accèder. ❌")
@@ -322,6 +323,58 @@ bot.on("message", async function(message) {
        message.delete();
        break;
 
+case "traductionhelp":
+            var embed = new Discord.RichEmbed()
+                 .addField(".tradenfr", "Traduction Anglais ==> Français !") 
+                 .addField(".tradfren", "Traduction Français ==> Anglais !")
+                 .addField(".tradesfr", "Traduction Espagnol ==> Français !")
+                 .addField(".tradfres", "Taduction Français ==> Espagnol !")
+                 .addField(".tradesen", "Traduction Espagnol ==> Anglais !")
+                 .addField(".tradenes", "Taduction Anglais ==> Espagnol !")            
+                .setColor("#00ffcc")
+                .setFooter("Amuse toi a traduire petit enfant !")
+                .setAuthor("Pannel des Traduction")
+                .setDescription("Petit rappelle le, je vais seulement envoyé un liens google traduction !")
+                .setTimestamp()
+                message.delete()
+                message.channel.sendEmbed(embed)
+            break;      
+      
+       case "tradenfr":
+        let tradenfr = message.content.split(' ');
+        tradenfr.shift();
+        console.log("Traduction Anglais ==> Français");
+        message.reply('https://translate.google.fr/#en/fr/' + tradenfr.join('%20'));
+        break;
+      
+        case "tradfren":
+         let tradfren = message.content.split(' ');
+         tradfren.shift();
+         console.log("Traduction Français ==> Anglais");
+         message.reply('https://translate.google.fr/#fr/en/' + tradfren.join('%20'));
+         break;
+      
+        case "tradesfr":
+         let tradesfr = message.content.split(' ');
+         tradesfr.shift();
+         console.log("Traduction Espagnol ==> Français");
+         message.reply('https://translate.google.fr/#es/fr/' + tradesfr.join('%20'));
+         break;
+      
+        case "tradfres":
+         let tradfres = message.content.split(' ');
+         tradfres.shift();
+         console.log("Traduction Français ==> Espagnol");
+         message.reply('https://translate.google.fr/#fr/es/' + tradfres.join('%20'));
+         break;      
+      
+        case "tradenes":
+         let tradenes = message.content.split(' ');
+         tradenes.shift();
+         console.log("Traduction Anglais ==> Espagnol");
+         message.reply('https://translate.google.fr/#en/es/' + tradesen.join('%20'))
+         break;      
+      
        case "lalaland":
        message.reply('❌**DESACTIVER**❌');
        message.delete();
