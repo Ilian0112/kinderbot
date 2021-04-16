@@ -1,424 +1,45 @@
-﻿const Discord = require("discord.js");
-const YTDL = require("ytdl-core");
-const PREFIX = ".";
-const queue = new Map();
-const EVERYONE = "@";
+const Discord = require('discord.js');
+const fs = require('fs');
 
-var client = new Discord.Client();
+const { prefix, token } = require('./config.json');
 
-var bot = new Discord.Client();
+const client = new Discord.Client();
+client.commands = new Discord.Collection();
 
-var servers = {};
+const commandFiles = fs.readdirSync(`./cmds`).filter(file => file.endsWith('.js'));
 
-function play(connection, message) {
- var server = servers[message.guild.id];
-    
-    server.dispatcher = connection.playStream(YTDL(server.queue[0], {filter: "audioonly"}));
-    
-    server.queue.shift();
-    
-    server.dispatcher.on("end", function() {
-     if (server.queue[0]) play(connection, message);
-     else connection.disconnect();
-    });
+for (const file of commandFiles) {
+    const command = require(`./cmds/${file}`)
+    client.commands.set(command.name, command);
 }
 
-bot.on("ready", function () {
-    bot.user.setGame("Mange des Kinder - .help |", "https://www.twitch.tv/nawk_")
-    bot.user.setUsername("KinderBOT - V1")
-    console.log("KinderBOT V2 - Connecté");
-});
-
-bot.on('message', function(message) {
-
-        if(message.content === 'Salut') {
-            message.reply('Bonjour')
-        }
-
-        if(message.content === 'salut') {
-            message.reply('Bonjour')
-        }
-
-        if(message.content === 'Ilian') {
-            message.channel.sendMessage("On ne juge mon **développeur **! :o")
-        }
-
-        if(message.content === 'ilian') {
-            message.channel.sendMessage("On ne juge mon **développeur** ! :o")
-        }
-
-        if(message.content === 'ça va') {
-            message.channel.sendMessage("Je vais toujours bien, je suis un robot!")
-        }
-            
-        if(message.content === 'Ça va') {
-            message.channel.sendMessage("Je vais toujours bien, je suis un robot!")
-        }
-
-        if(message.content === 'Qui est la') {
-            message.channel.sendMessage("MOIII")
-        
-        }
-        if(message.content === 'Bye') {
-            message.channel.sendMessage('À Bientôt ! ^^')
-        
-        }
-        if(message.content === 'bye') {
-            message.channel.sendMessage('À Bientôt ! ^^')
-        }
-
-        if(message.content === 'wsh') {
-            message.channel.sendMessage('wshh frr')
-        }
-    
-        if(message.content === 'kinder') {
-            message.channel.sendMessage('Des Kinders ? Ou ça !')
-        }
-
-        if(message.content === 'Wsh') {
-            message.channel.sendMessage('wshh frr')
-        }
-    
-    
+client.on('ready', () => {
+    client.user.setStatus("dnd")
+    client.user.setActivity("romain et ilian ken", {
+        'type': 'WATCHING'
     });
 
-bot.on("guildMemberAdd", function(member) {
-    member.guild.channels.find("name","membres-logs").sendMessage(member.toString() + " Bienvenue sur le discord de **Nawk** ! :white_check_mark:");
-    member.addRole(member.guild.roles.find("name", "Abonnés"));
+    console.log(`Logged as ${client.user.tag}`);
 });
 
-bot.on("guildMemberRemove", function(member) {
-     member.guild.channels.find("name", "membre-logs").sendMessage(member.toString() + " Bye bye!" + member.toString() + " :x:");
+client.on('message', message => {
+    if (!message.content.startsWith(prefix) || message.author.bot) return;
+
+    const args = message.content.slice(prefix.length).split(/ +/);
+    const command = args.shift().toLowerCase();
+
+    var cmdintrou = new Discord.MessageEmbed()
+        .setColor("#36393F")
+        .setTimestamp()
+            .addField("⚠️Une erreur est survue⚠️", "La commande effectuez est un trouvable !")
+    if (!client.commands.has(command)) return message.channel.send(cmdintrou);
+
+    try {
+        client.commands.get(command).execute(message, args);
+    } catch (error) {
+        console.error(error);
+        message.reply("Une erreur s'est produite.")
+    }    
 })
 
-
-bot.on("message", async function(message) {
-    if (message.author.equals(bot.user)) return;
-
-    if (!message.content.startsWith(PREFIX)) return;
-
-    var args = message.content.substring(PREFIX.length).split (" ");
-
-    var args2 = message.content.split(" ").slice(1);
-
-    var suffix = args2.join(" ");
-
-    var reason = args2.slice(1).join(" ");
-    
-    var reasontimed = args2.slice(2).join(' ')
-
-    var user = message.mentions.users.first();
-    
-    var guild = message.guild;
-    
-    var member = message.member;
-
-    var roleJoueur= member.guild.roles.find("name", "Abonnés")
-    
-    var roleMute = member.guild.roles.find("name", "Muted")
-    
-    var modlog = member.guild.channels.find("name", "membre-logs")
-    
-    var user = message.mentions.users.first();
-
-    switch (args[0].toLowerCase()) {
-        case "play":
-            if (!args[1]) {
-             message.channel.sendMessage("[KinderBOT Musique] - Vous devez mettre un lien.");   
-             return;
-            }
-            if(!message.member.voiceChannel) {
-             message.channel.sendMessage("[KinderBOT Musique] - Vous devez être dans un salon vocal.");   
-             return;
-            }
-            
-            if(!servers[message.guild.id]) servers[message.guild.id] = {
-                queue: []
-            };
-            
-            var server = servers[message.guild.id];
-      
-            server.queue.push(args[1]);
-            
-            if(!message.guild.voiceConnection) message.member.voiceChannel.join().then(function(connection) {
-               play(connection, message) 
-            });
-        break;    
-      
-        case "skip":
-             if(!message.member.voiceChannel) {
-             message.channel.sendMessage("[KinderBOT Musique] - Vous devez être dans un salon vocal.");   
-             return;
-            }
-            var server = servers[message.guild.id];
-            if(server.dispatcher) server.dispatcher.end();
-        break;    
-      
-        case "stop":
-             if(!message.member.voiceChannel) {
-             message.channel.sendMessage("[KinderBOT Musique] - Vous devez être dans un salon vocal.");   
-             return;
-            }
-             const serverQueue = queue.get(message.guild.id);
-             var server = servers[message.guild.id];
-             if (!serverQueue) return message.channel.send("[KinderBOT Musique] - Aucune musique est joué, je ne peux donc pas exécuter cette commande. ❌")
-            if(message.guild.voiceConnection) message.guild.voiceConnection.disconnect();
-     
-        break;    
-        case "membres":
-            message.reply("Nous sommes " + bot.users.size + " membres sur le discord !");
-        break
-        case "unmute":
-        if(!message.member.hasPermission("BAN_MEMBERS")) return message.channel.sendMessage("Tu ne peux exécuter cette commande. ❌");
-        if(!modlog) return message.reply("Je ne trouve pas de channel log.");
-        var member = message.mentions.members.first();
-        if (message.mentions.users.size < 1) return message.reply("À qui je retire la sanction: MUTE ?")
-        member.removeRole(roleMute)
-        message.channel.sendMessage(user.toString() + " a bien été unmute ✅")
-        
-        var embed = new Discord.RichEmbed()
-        .addField("Commande :", "UNMUTE")
-        .addField("Utilisateur :", user.username)
-        .addField("Modérateur :", message.author.username)
-        .addField("Heure:", message.channel.createdAt)
-        .setColor("#3333cc")
-        .setAuthor(message.author.username, message.author.avatarURL)
-        .setTimestamp()
-        member.guild.channels.find("name", "membre-logs").sendEmbed(embed);
-        break;
-        case "mute":
-        if(!message.member.hasPermission("BAN_MEMBERS")) return message.channel.sendMessage("Tu n'as pas la permission d'exécuter la commande. :x:");
-        if(!modlog) return message.reply("Je ne trouve pas de channel log.");  
-        if (!reasontimed) return message.reply("Tu as oublié la raison ! :D")
-        var member = message.mentions.members.first();
-        if (message.mentions.users.size < 1) return message.reply("À qui je dois mettre la sanction: MUTE")
-        message.channel.sendMessage(member.toString() + " a bien été mute. ✅")
-        member.addRole(roleMute)
-
-        var embed = new Discord.RichEmbed()
-        .addField("Action :", "Mute")
-        .addField("Utilisateur :", user.toString())
-        .addField("Modérateur :", message.author.toString())
-        .addField("Raison :", reasontimed)
-        .setColor("#FFFF00")
-        .setAuthor(message.author.username, message.author.avatarURL)
-        .setTimestamp()
-        member.guild.channels.find("name", "📄logs📄").sendEmbed(embed);
-        break;
-        case "shelp":
-            if(!message.member.hasPermission("KICK_MEMBERS")) return message.channel.sendMessage("Tu ne peux exécuter cette commande. ❌");
-            var messagecount = parseInt(args2.join(" "));
-            message.channel.fetchMessages({
-                limit: messagecount
-            }).then(messages => message.channel.bulkDelete(messagecount));
-                        message.delete()
-        var embed = new Discord.RichEmbed()
-            .addField(".ban", "Cette commande permet de bannir un utilisateur ! Pour l'utiliser, faites .ban @(utilisateur) + (raison)")
-            .addField(".kick", "Cette commande permet de kick un utilisateur ! Pour l'utiliser, faites .kick @(utilisateur) + (raison)")
-             .addField(".purge", "Cette commande permet de supprimé des messages beaucoup plus rapidement ! Pour l'utiliser, faites .purge (nombredemessages)")
-             .addField(".mute", "Cette commande permet de muté un utilisateur pendant un certain temps. Pour l'utiliser, faites .mute @(utilisateur) + (raison)")
-             .addField(".unmute", "Cette commande permet d'unmute un utilisateur. Pour l'utiliser, faites .unmute @(utilisateur)")
-            .setColor("#cc0000")
-            .setFooter("Aide du staff.")
-            .setAuthor("Pannel d'aide du staff")
-            .setDescription("Voici les commandes du staff !")
-            .setTimestamp()
-            message.delete()
-            message.channel.sendEmbed(embed)
-        break;    
-        
-        case "help":
-            var embed = new Discord.RichEmbed()
-                 .addField(".ping", "Grâce à cette commande, tu pourras savoir ton ping !") 
-                 .addField(".reseau", "Vous donne le twitter du serveur !")
-                 .addField(".play", "Jouer une musique !  Pour l'utiliser, faites .play (lien) !")
-                 .addField(".skip", "Sauter une musique  Pour l'utiliser, faites .skip !")
-                 .addField(".stop", "Arreter la musique  Pour l'utiliser, faites .stop !")
-                 .addField(".kinder", "Envoie un liens sur une image de Kinder !")
-                 .addField(".lalaland", "Pour rejoindre LaLa Land !")
-                 .addField(".traductionhelp", "Pour afficher l'aide des traductions !")
-                 .addField(".umbreallscp ", "Pour rejoindre  Umbreall SCP !")
-                 .addField(".google", "Commande pas trop utile mais tu peut faire des recherche google. Pour l'utiliser, faites .google (recherche) !")
-                 .addField(".shelp", "❌Afficher les commandes du staff. Mais seule ceux qui ont la perm de kick pourrons y accèder. ❌")
-                .setColor("#0000ff")
-                .setFooter("Idée de commande ? Proposer en MP!")
-                .setAuthor("Pannel d'aide")
-                .setDescription("Voici les commandes du bot !")
-                .setTimestamp()
-                message.delete()
-                message.channel.sendEmbed(embed)
-            break;
-        case "kick":
-            if(!message.member.hasPermission("KICK_MEMBERS")) return message.channel.sendMessage("Tu n'as pas la permission d'exécuter la commande. :x:");
-            if(!modlog) return message.reply("Je ne trouve pas de channel log.");
-            if (reason.length < 1) return message.reply("Tu as oublié la raison ! :D");
-            if (message.mentions.users.size < 1) return message.reply("Tu n'as pas mis son pseudo au complet ! :o")
-            message.guild.member(user).kick();
-            message.channel.send(user.toString() + " a bien été kick ✅")
-
-            var embed = new Discord.RichEmbed()
-            .addField("Commande :", "KICK")
-            .addField("Utilisateur :", user.username)
-            .addField("Modérateur :", message.author.username)
-            .addField("Raison : ", reason)
-            .addField("Heure:", message.channel.createdAt)
-            .setColor("#99ff33")
-            .setAuthor(message.author.username, message.author.avatarURL)
-            .setTimestamp()
-            member.guild.channels.find("name", "membres-logs").sendEmbed(embed);
-            bot.channels.get('371655175049314304').sendMessage(":white_check_mark: Le joueur " + user.username + " à bien été kick pour: " + reason);
-       
-            message.delete();
-            break;
-        case "ban":
-            if(!message.member.hasPermission("BAN_MEMBERS")) return message.channel.sendMessage("Tu ne peux exécuter cette commande.");
-            if(!modlog) return message.reply("Je ne trouve pas de channel log.");
-            if (reason.length < 1) return message.reply("Tu as oublié la raison.");
-            if (message.mentions.users.size < 1) return message.reply("Tu as oublié de préciser qui je dois bannir..")
-            
-            message.guild.ban(user, 2);
-            message.channel.send(user.toString() + " a bien été banni ✅")
-
-            var embed = new Discord.RichEmbed()
-            .addField("Commande :", "BAN")
-            .addField("Utilisateur :", user.username)
-            .addField("Modérateur :", message.author.username)
-            .addField("Raison : ", reason)
-            .addField("Heure:", message.channel.createdAt)
-            .setColor("#ff9933")
-            .setAuthor(message.author.username, message.author.avatarURL)
-            .setTimestamp()
-            member.guild.channels.find("name", "membres-logs").sendEmbed(embed);
-            
-            bot.channels.get('371655175049314304').sendMessage(":white_check_mark: Le joueur " + user.username + " à bien été kick pour: " + reason);
-            
-            message.delete();
-            break;
-        case "purge":
-            if(!message.member.hasPermission("KICK_MEMBERS")) return message.channel.sendMessage("Tu ne peux exécuter cette commande. ❌");
-            var messagecount = parseInt(args2.join(" "));
-            message.channel.fetchMessages({
-                limit: messagecount
-            }).then(messages => message.channel.bulkDelete(messagecount));
-                        message.delete()
-            var embed = new Discord.RichEmbed()
-            .addField("Commande :", "Purge des messages")
-            .addField("Modérateur :", message.author.username)
-            .addField("Message supprimé", messagecount)
-            .addField("Heure:", message.channel.createdAt)
-            .setColor("#009999")
-            .setFooter("Ouf ! Sa as fait un bon ménage dans le serveur ! ^^")
-            message.delete()
-            member.guild.channels.find("name", "membres-logs").sendEmbed(embed);
-            break;
-
-
-       case "reseau":
-       message.reply('❌**DESACTIVER**❌');
-       message.delete();
-       break;
-
-       case "kinder":
-       message.reply('https://potinfaux.org/org/wp-content/uploads/penurie-chocolat-kinder.jpg');
-       message.delete();
-       break;
-
-case "traductionhelp":
-            var embed = new Discord.RichEmbed()
-                 .addField(".tradenfr", "Traduction Anglais ==> Français !") 
-                 .addField(".tradfren", "Traduction Français ==> Anglais !")
-                 .addField(".tradesfr", "Traduction Espagnol ==> Français !")
-                 .addField(".tradfres", "Taduction Français ==> Espagnol !")
-                 .addField(".tradesen", "Traduction Espagnol ==> Anglais !")
-                 .addField(".tradenes", "Taduction Anglais ==> Espagnol !")            
-                .setColor("#00ffcc")
-                .setFooter("Amuse toi a traduire petit enfant !")
-                .setAuthor("Pannel des Traduction")
-                .setDescription("Petit rappelle le, je vais seulement envoyé un liens google traduction !")
-                .setTimestamp()
-                message.delete()
-                message.channel.sendEmbed(embed)
-            break;      
-      
-       case "tradenfr":
-        let tradenfr = message.content.split(' ');
-        tradenfr.shift();
-        console.log("Traduction Anglais ==> Français");
-        message.reply('https://translate.google.fr/#en/fr/' + tradenfr.join('%20'));
-        break;
-      
-        case "tradfren":
-         let tradfren = message.content.split(' ');
-         tradfren.shift();
-         console.log("Traduction Français ==> Anglais");
-         message.reply('https://translate.google.fr/#fr/en/' + tradfren.join('%20'));
-         break;
-      
-        case "tradesfr":
-         let tradesfr = message.content.split(' ');
-         tradesfr.shift();
-         console.log("Traduction Espagnol ==> Français");
-         message.reply('https://translate.google.fr/#es/fr/' + tradesfr.join('%20'));
-         break;
-      
-        case "tradfres":
-         let tradfres = message.content.split(' ');
-         tradfres.shift();
-         console.log("Traduction Français ==> Espagnol");
-         message.reply('https://translate.google.fr/#fr/es/' + tradfres.join('%20'));
-         break;      
-      
-        case "tradenes":
-         let tradenes = message.content.split(' ');
-         tradenes.shift();
-         console.log("Traduction Anglais ==> Espagnol");
-         message.reply('https://translate.google.fr/#en/es/' + tradesen.join('%20'))
-         break;      
-      
-       case "lalaland":
-       message.reply('❌**DESACTIVER**❌');
-       message.delete();
-       break;
-
-       case "umbreallscp":
-       message.reply('❌**DESACTIVER**❌');
-       message.delete();
-       break;
-
-       case "ping":
-        message.channel.sendMessage("Pong! Tu as actuellement `" + bot.ping + " ms !` :D");
-        message.delete();
-        break; 
-            
-       case "google":
-        let args = message.content.split(' ');
-        args.shift();
-        console.log("J'ai rechercher!");
-        message.reply('https://www.google.fr/#q=' + args.join('%20'));
-        break;
-
-       case "web":
-           if(!message.member.hasPermission("BAN_MEMBERS")) return message.channel.sendMessage("Tu ne peux exécuter cette commande. ❌");
-            var messagecount = parseInt(args2.join(" "));
-            message.channel.fetchMessages({
-                limit: messagecount
-            }).then(messages => message.channel.bulkDelete(messagecount));
-                        message.delete()
-         let annonce = message.content.split(" ");
-         annonce.shift();
-       var embed = new Discord.RichEmbed()
-       .addField("Annonce !", " "+ annonce.join(" "))
-       .setColor("#336699")
-       .setFooter("By Ilian ! ^^")
-       message.delete();
-       message.channel.send("@everyone Nouvelle annonce")
-       member.guild.channels.find("name", "discussions").sendEmbed(embed);
-       break;
-
-        default:
-            message.channel.sendMessage("Commande invalide ^^ Fait .help pour voir toutes les commandes disponibles !")
-            message.delete();
-    }
-});
-
-bot.login('NDM2NjA1MTM4MjY2NzUwOTkz.Db4aDQ.0DizRfrbBhDBnywgo-uziYFJsM4');
+client.login(process.env.token)
