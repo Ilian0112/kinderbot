@@ -42,4 +42,43 @@ client.on('message', message => {
     }    
 })
 
+client.on('messageDelete', async message => {
+	if (!message.guild) return;
+	const fetchedLogs = await message.guild.fetchAuditLogs({
+		limit: 1,
+		type: 'MESSAGE_DELETE',
+	});
+    
+	const deletionLog = fetchedLogs.entries.first();
+
+    const msgdel1 = new Discord.MessageEmbed()
+        .setAuthor("Suppression d'un message")
+        .setColor("#36393F") 
+        .setDescription(`**Action**: Suppression de message\nUn message de ${message.setAuthor} a été supprimé, mais aucune logs pertinente n'a été trouvé.`)
+        .setTimestamp()
+        .setFooter(`𝓜𝓸𝓿𝓲𝓮𝓼 & 𝓒𝓱𝓲𝓵𝓵 🍿`)
+
+	if (!deletionLog) return client.channels.cache.get('832975066941751346').send(msgdel1);
+
+	const { executor, target } = deletionLog;
+
+    if (target.id === message.author.id) {
+        const msgdel2 = new Discord.MessageEmbed()
+            .setAuthor("Suppression d'un message")
+            .setDescription(`**Action**: Suppression de message\n**Message suprimé**: ${message.content}\n**Auteur du message**: ${message.author.tag}\n**Message suprimé par**: ${executor.tag}`)
+            .setTimestamp()
+            .setFooter(`𝓜𝓸𝓿𝓲𝓮𝓼 & 𝓒𝓱𝓲𝓵𝓵 🍿`)
+
+        client.channels.cache.get('832975066941751346').send(msgdel2);
+	} else {
+        const msgdel3 = new Discord.MessageEmbed()
+            .setAuthor("Suppression d'un message")
+            .setDescription(`**Action**: Suppression de message\n**Message suprimé**: ${message.content}\n**Auteur du message**: ${message.author.tag}\n**Message suprimé par**: Introuvable`)
+            .setTimestamp()
+            .setFooter(`𝓜𝓸𝓿𝓲𝓮𝓼 & 𝓒𝓱𝓲𝓵𝓵 🍿`)
+
+        client.channels.cache.get('832975066941751346').send(msgdel3);
+	}
+});
+
 client.login(process.env.token)
