@@ -1,7 +1,7 @@
 {
-  "name": "diversionbot",
-  "version": "1.0.0",
-  "description": "Bot discord de Diversion !",
+  "name": "mcb",
+  "version": "1.0.2",
+  "description": "mcb",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
