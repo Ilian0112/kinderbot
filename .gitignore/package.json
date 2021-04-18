@@ -9,8 +9,8 @@
   "author": "ilian0112",
   "license": "ISC",
   "dependencies": {
-    "async": "^3.2.0",
     "discord.js": "^12.5.3",
-    "fs": "0.0.1-security"
+    "fs": "0.0.1-security",
+    "quick.db": "7.1.3"
   }
 }
