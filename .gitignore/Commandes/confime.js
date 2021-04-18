@@ -15,7 +15,7 @@ module.exports.run = async(client, message, args) => {
     let items6 = item.fetch(`${itemdb6}${message.guild.id}_${user.id}`);
 
     if(message.member.roles.cache.find(r => r.name === nsfwr)) {
-        if (message.author.id === "290105316740169728") {
+        if (message.author.id === "689153093551784028") {
             if(args[0] === "1") {
                 if(items1 < 0) {
                     item.subtract(`${itemdb1}${message.guild.id}_${message.author.id}`, 1)
