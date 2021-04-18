@@ -39,7 +39,7 @@ module.exports.run = async(client, message, args) => {
     let items6 = item.fetch(`${itemdb6}${message.guild.id}_${user.id}`);
     if (items6 === null) items6 = 0;
 
-    if (message.author.id === "290105316740169728") {
+    if (message.author.id === "689153093551784028") {
         if(message.member.roles.cache.find(r => r.name === nsfwr)) {
             var hornyshop = new Discord.MessageEmbed()
             .setColor("#36393F")
