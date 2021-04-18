@@ -21,6 +21,6 @@ const config = {
     "item6": "Vidéo Hard",
     "itemdb6": "videohard_",
     "itempx6": "8000",
-    "PREFIX": "*"
+    "PREFIX": "!"
 };
 module.exports = config;
