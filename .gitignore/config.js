@@ -1,8 +1,8 @@
 const config = {
     "nsfwr": "𝐍𝐒𝐅𝐖 𝐀𝐜𝐜𝐞𝐬𝐬",
-    "hdevise": "<:hornycoin:833391080460386364>",
-    "devise": "<:coins:833387915756830730>",
-    "nsfwrid": "832251791286075463",
+    "hdevise": "<:hornycoin:833418235561902121>",
+    "devise": "<:coins:833418235340128256>",
+    "nsfwrid": "832731785775153222",
     "item1": "Nude Soft",
     "itemdb1": "nudesoft_",
     "itempx1": "500",
